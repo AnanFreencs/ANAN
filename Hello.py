@@ -1,148 +1,128 @@
 import streamlit as st
+from PIL import Image
 import random
-from streamlit.components.v1 import html
 
-# ========== Konfigurasi Tema ==========
-def set_hello_kitty_theme():
-    st.markdown("""
-    <style>
-    /* Background dan font */
-    .stApp {
-        background: linear-gradient(135deg, #ff9eb5, #ffffff, #ff9eb5);
-        font-family: 'Comic Sans MS', cursive;
-    }
-    
-    /* Judul animasi */
-    @keyframes rainbow {
-        0% {color: #ff69b4;}
-        25% {color: #ff1493;}
-        50% {color: #ff00ff;}
-        75% {color: #ff1493;}
-        100% {color: #ff69b4;}
-    }
-    
-    h1 {
-        animation: rainbow 2s infinite;
-        text-shadow: 2px 2px #ffffff;
-    }
-    
-    /* Tombol kustom */
-    .stButton>button {
-        background: #ff69b4 !important;
-        color: white !important;
-        border-radius: 20px !important;
-        border: 2px solid white !important;
-        padding: 10px 25px !important;
-    }
-    
-    /* Efek hover tombol */
-    .stButton>button:hover {
-        background: #ff1493 !important;
-        transform: scale(1.1);
-        transition: 0.3s;
-    }
-    
-    /* Container kartu ucapan */
-    .greeting-card {
-        background: white;
-        border-radius: 25px;
-        padding: 30px;
-        box-shadow: 0 10px 20px rgba(255,105,180,0.2);
-        border: 3px solid #ff69b4;
-        position: relative;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# Konfigurasi halaman
+st.set_page_config(
+    page_title="Hello Kitty Greetings",
+    page_icon="🎀",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
 
-# ========== Fungsi Animasi ==========
-def confetti():
-    html("""
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-    const count = 200;
-    const defaults = {
-        origin: { y: 0.7 }
-    };
+# Fungsi untuk generate warna random
+def random_color():
+    return f"#{random.randint(0, 0xFFFFFF):06x}"
 
-    function fire(particleRatio, opts) {
-        confetti(Object.assign({}, defaults, opts, {
-            particleCount: Math.floor(count * particleRatio)
-        }));
+# Custom CSS untuk styling
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+    
+    .hello-kitty-theme {
+        background: linear-gradient(45deg, #FF9A8B, #FF6F91, #FF9671, #FFC75F);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-family: 'Comic Neue', cursive;
     }
-
-    fire(0.25, { spread: 26, startVelocity: 55 });
-    fire(0.2, { spread: 60 });
-    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
-    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
-    fire(0.1, { spread: 120, startVelocity: 45 });
-    </script>
-    """)
-
-# ========== Main App ==========
-def main():
-    set_hello_kitty_theme()
     
-    st.title("🎀 Hello Kitty Celebration Station! 🐱")
+    .title {
+        color: #FFFFFF;
+        text-shadow: 2px 2px #FF6F91;
+        font-size: 3rem !important;
+    }
     
-    with st.expander("🎈 Buat Ucanganmu Sendiri!"):
-        col1, col2 = st.columns(2)
-        with col1:
-            name = st.text_input("Nama Kamu:", placeholder="Masukkan nama kamu...")
-            message = st.text_area("Pesan Ucapan:", height=100, 
-                                 placeholder="Tulis pesan spesialmu di sini...")
-            
-        with col2:
-            card_color = st.selectbox("Warna Kartu:", ["Pink", "Ungu", "Mint"])
-            kitty_icon = st.selectbox("Pilih Hello Kitty:", ["🐱", "🎀", "👑", "🍓"])
-            if st.button("Buat Kartu Ucapan!"):
-                st.session_state.show_card = True
-                st.balloons()
-                confetti()
+    .message {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 1.5rem;
+        border-radius: 15px;
+        font-size: 1.5rem;
+        color: #333333;
+        margin: 1rem 0;
+    }
+    
+    .kitty-image {
+        max-width: 200px;
+        margin: 0 auto;
+        display: block;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+""", unsafe_allow_html=True)
 
-    if st.session_state.get('show_card'):
-        st.markdown(f"""
-        <div class="greeting-card" style="background: {
-            '#ffb3d9' if card_color == 'Pink' else 
-            '#e6b3ff' if card_color == 'Ungu' else 
-            '#b3ffd9'
-        };">
-            <div style="text-align:center; font-size:24px;">
-                {kitty_icon * 3} {name.upper() if name else "Teman Tersayang"} {kitty_icon * 3}
-            </div>
-            <div style="font-size:20px; padding:30px; text-align:center;">
-                {message or "🎉 Selamat ya! Kamu Luar Biasa! 🎉"}
-            </div>
-            <div style="display: flex; justify-content: space-around; font-size:30px;">
-                {'🌸🌺🌼' * 3}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+# Konten utama
+st.markdown("<div class='hello-kitty-theme'>", unsafe_allow_html=True)
+
+# Header dengan animasi
+st.markdown("<h1 class='title'>🎀 Hello Kitty Greetings 🎀</h1>", unsafe_allow_html=True)
+
+# Input dari user
+name = st.text_input("Masukkan nama kamu:", max_chars=20)
+occasion = st.selectbox(
+    "Pilih acara:",
+    ["Ulang Tahun", "Selamat Pagi", "Selamat Siang", "Selamat Malam", "Selamat Hari Raya"]
+)
+
+# Tombol generate ucapan
+if st.button("Buat Ucapan 🎀"):
+    if name:
+        # Template ucapan
+        greetings = {
+            "Ulang Tahun": f"Happy Birthday, {name}! 🎂🎉",
+            "Selamat Pagi": f"Good Morning, {name}! 🌞🌸",
+            "Selamat Siang": f"Good Afternoon, {name}! ☀️🍱",
+            "Selamat Malam": f"Good Night, {name}! 🌙⭐",
+            "Selamat Hari Raya": f"Happy Holidays, {name}! 🎄🎁"
+        }
         
-        # Animasi tambahan
-        st.markdown("""
-        <style>
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
-            font-size: 50px;
-            text-align: center;
-        }
-        </style>
-        <div class="float-animation">
-            🎀🐱🍰🎂🍩🍭
-        </div>
-        """, unsafe_allow_html=True)
+        # Tampilkan ucapan
+        st.markdown(
+            f"<div class='message' style='border: 2px solid {random_color()};'>"
+            f"<h2>{greetings[occasion]}</h2>"
+            f"<p>Semoga harimu menyenangkan!</p>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+        
+        # Tampilkan gambar Hello Kitty
+        kitty_images = [
+            "https://i.imgur.com/3QZQZ9Q.png",
+            "https://i.imgur.com/4QZQZ9Q.png",
+            "https://i.imgur.com/5QZQZ9Q.png"
+        ]
+        st.markdown(
+            f"<img src='{random.choice(kitty_images)}' class='kitty-image'>",
+            unsafe_allow_html=True
+        )
+        
+        # Confetti effect
+        st.balloons()
+    else:
+        st.warning("Mohon masukkan nama kamu dulu ya!")
 
-    # Musik latar
+st.markdown("</div>", unsafe_allow_html=True)
+
+# Sidebar informasi
+with st.sidebar:
+    st.header("🎀 Tentang Aplikasi")
     st.markdown("""
-    <audio autoplay loop controls style="display: none;">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    </audio>
-    """, unsafe_allow_html=True)
-
-if __name__ == "__main__":
-    main()
+    Aplikasi ini dibuat dengan:
+    - 💖 Streamlit
+    - 🎨 Custom CSS
+    - 🐾 Hello Kitty theme
+    
+    Fitur:
+    - 🌈 Warna-warni
+    - 🎀 Animasi
+    - 🎉 Confetti effect
+    - 🖼️ Gambar Hello Kitty random
+    """)
+    
+    st.markdown("---")
+    st.markdown("Made with 💖 by [Your Name]")
