@@ -1,140 +1,148 @@
 import streamlit as st
-import datetime
-import pandas as pd
-import os
+import random
+from streamlit.components.v1 import html
 
-# Fungsi untuk menyimpan data ke file CSV
-def save_data(todos):
-    df = pd.DataFrame(todos)
-    df.to_csv('todos.csv', index=False)
-
-# Fungsi untuk memuat data dari file CSV
-@st.cache_data
-def load_data():
-    if os.path.exists('todos.csv'):
-        df = pd.read_csv('todos.csv')
-        return df.to_dict('records')
-    return []
-
-# Inisialisasi session state
-if 'todos' not in st.session_state:
-    st.session_state.todos = load_data()
-
-# Konfigurasi halaman
-st.set_page_config(
-    page_title="Streamlit Todo List",
-    page_icon="✅",
-    layout="wide"
-)
-
-# Sidebar untuk input baru
-with st.sidebar:
-    st.header("Tambah Todo Baru")
-    with st.form(key='todo_form'):
-        new_todo = st.text_input("Deskripsi Task")
-        due_date = st.date_input("Due Date", datetime.date.today())
-        priority = st.selectbox("Prioritas", ["Low", "Medium", "High"])
-        submitted = st.form_submit_button("Tambah Task")
-
-        if submitted and new_todo:
-            new_task = {
-                "task": new_todo,
-                "due_date": due_date.strftime("%Y-%m-%d"),
-                "priority": priority,
-                "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "completed": False
-            }
-            st.session_state.todos.append(new_task)
-            save_data(st.session_state.todos)
-            st.success("Task berhasil ditambahkan!")
-
-# Main content
-st.title("📝 Todo List Interaktif")
-st.write("Aplikasi manajemen task sederhana dengan Streamlit")
-
-# Filter dan pencarian
-col1, col2 = st.columns([2, 1])
-with col1:
-    search_term = st.text_input("Cari task")
-
-with col2:
-    filter_priority = st.selectbox(
-        "Filter berdasarkan prioritas",
-        ["All", "High", "Medium", "Low"]
-    )
-
-# Tampilkan todos
-for index, todo in enumerate(st.session_state.todos):
-    # Filter data
-    if search_term.lower() not in todo['task'].lower():
-        continue
-    if filter_priority != "All" and todo['priority'] != filter_priority:
-        continue
+# ========== Konfigurasi Tema ==========
+def set_hello_kitty_theme():
+    st.markdown("""
+    <style>
+    /* Background dan font */
+    .stApp {
+        background: linear-gradient(135deg, #ff9eb5, #ffffff, #ff9eb5);
+        font-family: 'Comic Sans MS', cursive;
+    }
     
-    # Layout untuk setiap todo item
-    with st.container(border=True):
-        cols = st.columns([1, 4, 2, 2, 1])
+    /* Judul animasi */
+    @keyframes rainbow {
+        0% {color: #ff69b4;}
+        25% {color: #ff1493;}
+        50% {color: #ff00ff;}
+        75% {color: #ff1493;}
+        100% {color: #ff69b4;}
+    }
+    
+    h1 {
+        animation: rainbow 2s infinite;
+        text-shadow: 2px 2px #ffffff;
+    }
+    
+    /* Tombol kustom */
+    .stButton>button {
+        background: #ff69b4 !important;
+        color: white !important;
+        border-radius: 20px !important;
+        border: 2px solid white !important;
+        padding: 10px 25px !important;
+    }
+    
+    /* Efek hover tombol */
+    .stButton>button:hover {
+        background: #ff1493 !important;
+        transform: scale(1.1);
+        transition: 0.3s;
+    }
+    
+    /* Container kartu ucapan */
+    .greeting-card {
+        background: white;
+        border-radius: 25px;
+        padding: 30px;
+        box-shadow: 0 10px 20px rgba(255,105,180,0.2);
+        border: 3px solid #ff69b4;
+        position: relative;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# ========== Fungsi Animasi ==========
+def confetti():
+    html("""
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+    const count = 200;
+    const defaults = {
+        origin: { y: 0.7 }
+    };
+
+    function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, {
+            particleCount: Math.floor(count * particleRatio)
+        }));
+    }
+
+    fire(0.25, { spread: 26, startVelocity: 55 });
+    fire(0.2, { spread: 60 });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+    fire(0.1, { spread: 120, startVelocity: 45 });
+    </script>
+    """)
+
+# ========== Main App ==========
+def main():
+    set_hello_kitty_theme()
+    
+    st.title("🎀 Hello Kitty Celebration Station! 🐱")
+    
+    with st.expander("🎈 Buat Ucanganmu Sendiri!"):
+        col1, col2 = st.columns(2)
+        with col1:
+            name = st.text_input("Nama Kamu:", placeholder="Masukkan nama kamu...")
+            message = st.text_area("Pesan Ucapan:", height=100, 
+                                 placeholder="Tulis pesan spesialmu di sini...")
+            
+        with col2:
+            card_color = st.selectbox("Warna Kartu:", ["Pink", "Ungu", "Mint"])
+            kitty_icon = st.selectbox("Pilih Hello Kitty:", ["🐱", "🎀", "👑", "🍓"])
+            if st.button("Buat Kartu Ucapan!"):
+                st.session_state.show_card = True
+                st.balloons()
+                confetti()
+
+    if st.session_state.get('show_card'):
+        st.markdown(f"""
+        <div class="greeting-card" style="background: {
+            '#ffb3d9' if card_color == 'Pink' else 
+            '#e6b3ff' if card_color == 'Ungu' else 
+            '#b3ffd9'
+        };">
+            <div style="text-align:center; font-size:24px;">
+                {kitty_icon * 3} {name.upper() if name else "Teman Tersayang"} {kitty_icon * 3}
+            </div>
+            <div style="font-size:20px; padding:30px; text-align:center;">
+                {message or "🎉 Selamat ya! Kamu Luar Biasa! 🎉"}
+            </div>
+            <div style="display: flex; justify-content: space-around; font-size:30px;">
+                {'🌸🌺🌼' * 3}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Checkbox status
-        with cols[0]:
-            completed = st.checkbox(
-                "✓",
-                value=todo['completed'],
-                key=f"completed_{index}",
-                on_change=lambda i=index: toggle_status(i)
-            )
-        
-        # Deskripsi task
-        with cols[1]:
-            if todo['completed']:
-                st.markdown(f"~~{todo['task']}~~")
-            else:
-                st.markdown(todo['task'])
-        
-        # Prioritas dengan warna
-        with cols[2]:
-            priority_color = {
-                "High": "🔴",
-                "Medium": "🟡",
-                "Low": "🟢"
-            }
-            st.markdown(f"{priority_color[todo['priority']]} {todo['priority']}")
-        
-        # Due date
-        with cols[3]:
-            due_date = datetime.datetime.strptime(todo['due_date'], "%Y-%m-%d").date()
-            days_left = (due_date - datetime.date.today()).days
-            date_color = "red" if days_left < 3 else "green"
-            st.markdown(f"Due: <span style='color:{date_color}'>{todo['due_date']}</span>", 
-                        unsafe_allow_html=True)
-        
-        # Tombol hapus
-        with cols[4]:
-            if st.button("❌", key=f"delete_{index}"):
-                delete_todo(index)
+        # Animasi tambahan
+        st.markdown("""
+        <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+            font-size: 50px;
+            text-align: center;
+        }
+        </style>
+        <div class="float-animation">
+            🎀🐱🍰🎂🍩🍭
+        </div>
+        """, unsafe_allow_html=True)
 
-def toggle_status(index):
-    st.session_state.todos[index]['completed'] = not st.session_state.todos[index]['completed']
-    save_data(st.session_state.todos)
+    # Musik latar
+    st.markdown("""
+    <audio autoplay loop controls style="display: none;">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    """, unsafe_allow_html=True)
 
-def delete_todo(index):
-    del st.session_state.todos[index]
-    save_data(st.session_state.todos)
-    st.rerun()
-
-# Statistik
-st.divider()
-st.subheader("Statistik Task")
-col1, col2, col3 = st.columns(3)
-total_tasks = len(st.session_state.todos)
-completed_tasks = len([t for t in st.session_state.todos if t['completed']])
-pending_tasks = total_tasks - completed_tasks
-
-with col1:
-    st.metric("Total Task", total_tasks)
-
-with col2:
-    st.metric("Task Selesai", completed_tasks)
-
-with col3:
-    st.metric("Task Pending", pending_tasks)
+if __name__ == "__main__":
+    main()
